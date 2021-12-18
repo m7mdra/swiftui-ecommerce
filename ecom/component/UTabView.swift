@@ -18,6 +18,7 @@ public struct SlidingTabView : View {
     /// Internal state to keep track of the selection index
     @State private var selectionState: Int = 0 {
         didSet {
+            print("selection: \(selection) \(selectionState)")
             selection = selectionState
         }
     }
@@ -96,13 +97,19 @@ public struct SlidingTabView : View {
     
     
     private func tabId(tab:String)->Int {
+        
         return self.tabs.firstIndex(of: tab) ?? 0
     }
-    
+    let pub = NotificationCenter.default
+            .publisher(for: NSNotification.Name("updateScroll"))
+
+
     public var body: some View {
         ScrollView(.horizontal,showsIndicators: false) {
             ScrollViewReader{ value in
+
                 HStack{
+
                     ForEach(self.tabs, id:\.self) { tab in
                         Button(action: {
                             
@@ -121,7 +128,7 @@ public struct SlidingTabView : View {
                                 .font(.system(size: 33))
                                 .bold()
                         }
-                        .id(tabId(tab: tab) )
+                        .id(tabId(tab: tab))
                         .padding(.horizontal,10)
                         .accentColor(
                             self.isSelected(tabIdentifier: tab)
@@ -133,7 +140,12 @@ public struct SlidingTabView : View {
                             : self.inactiveTabColor)
                     }
                     
+                }.onReceive(pub) { (output) in
+                    withAnimation {
+                        value.scrollTo(selection,anchor: .center)
+                    }
                 }
+
                 
             }
         }
@@ -145,7 +157,7 @@ public struct SlidingTabView : View {
     // MARK: Private Helper
     
     private func isSelected(tabIdentifier: String) -> Bool {
-        return tabs[selectionState] == tabIdentifier
+        return selection == tabId(tab: tabIdentifier)
     }
     
 
@@ -155,7 +167,7 @@ public struct SlidingTabView : View {
 
 @available(iOS 13.0, *)
 struct SlidingTabConsumerView : View {
-    @State private var selectedTabIndex = 0
+    @State private var selectedTabIndex = 2
     
     var body: some View {
         VStack(alignment: .leading) {

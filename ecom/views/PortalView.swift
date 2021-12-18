@@ -15,7 +15,9 @@ struct PortalView: View {
     @State var currentSelection = 0
     var tabs = ["Sign up","Login","Forgot password"]
     @State  var index = 0
+    @State var isShowingDetailView = false
     var body: some View {
+        NavigationView{
         Colors.windowBackground.swiftUiColor
             .ignoresSafeArea()
             .overlay(
@@ -53,8 +55,12 @@ struct PortalView: View {
                             
                             
                         }.frame(height:formHeight(index))
-                        PrimaryButton(title: actionTitle(currentSelection)) {
+                        NavigationLink(destination: Text("Second View"), isActive: $isShowingDetailView) { EmptyView()
                             
+                        }
+                        
+                        PrimaryButton(title: actionTitle(currentSelection)) {
+                            isShowingDetailView.toggle()
                         }.padding()
                         
                         Text(bottomHelperText(index))
@@ -90,10 +96,14 @@ struct PortalView: View {
                         }
                     }
                  
-                    
+                    NotificationCenter.default.post(name: NSNotification.Name("updateScroll"), object: nil)
        
-                }))
-        
+                })).navigationBarHidden(true)
+                .navigationBarBackButtonHidden(true)
+
+                .onDisappear {
+                }
+        }
     }
     private func actionTitle(_ currentSelection:Int) -> String  {
         if (currentSelection == 0){
@@ -133,7 +143,7 @@ struct PortalView: View {
     }
     private func createAccountText()->NSMutableAttributedString{
         let attributedString =   NSMutableAttributedString()
-        attributedString.append(NSAttributedString(string: "Don’t have an account? Swipe right to \n",attributes:[.foregroundColor: Colors.raven]))
+        attributedString.append(NSAttributedString(string: "Don’t have an account? Swipe right to     \n",attributes:[.foregroundColor: Colors.raven]))
         attributedString.append(NSAttributedString(string: "create a new account.",attributes:[.foregroundColor: Colors.accent]))
         
         return attributedString
