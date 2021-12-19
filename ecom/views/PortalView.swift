@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NavigationStack
 
 
 
@@ -16,8 +17,10 @@ struct PortalView: View {
     var tabs = ["Sign up","Login","Forgot password"]
     @State  var index = 0
     @State var isShowingDetailView = false
+
+    @EnvironmentObject private var navigationStack: NavigationStack
     var body: some View {
-        NavigationView{
+
         Colors.windowBackground.swiftUiColor
             .ignoresSafeArea()
             .overlay(
@@ -35,8 +38,6 @@ struct PortalView: View {
                             .fontWeight(Font.Weight.light)
                             .padding()
                     }
-                    
-                    
                     VStack {
                         Form{
                             
@@ -55,12 +56,11 @@ struct PortalView: View {
                             
                             
                         }.frame(height:formHeight(index))
-                        NavigationLink(destination: Text("Second View"), isActive: $isShowingDetailView) { EmptyView()
-                            
-                        }
+               
                         
                         PrimaryButton(title: actionTitle(currentSelection)) {
-                            isShowingDetailView.toggle()
+                            
+                            navigationStack.push(MainView())
                         }.padding()
                         
                         Text(bottomHelperText(index))
@@ -98,12 +98,8 @@ struct PortalView: View {
                  
                     NotificationCenter.default.post(name: NSNotification.Name("updateScroll"), object: nil)
        
-                })).navigationBarHidden(true)
-                .navigationBarBackButtonHidden(true)
-
-                .onDisappear {
-                }
-        }
+                }))
+        
     }
     private func actionTitle(_ currentSelection:Int) -> String  {
         if (currentSelection == 0){
@@ -156,91 +152,3 @@ struct PortalView_Previews: PreviewProvider {
     }
 }
 
-struct LoginView : View{
-    var body: some View{
-        VStack {
-            Form{
-                UTextView(iconName: "profile", label: "Username/Email")
-                
-                UTextView(iconName: "lock", label: "Passowrd",secure: true)
-                
-                
-            }
-            .frame(height:180)
-            PrimaryButton(title: "LOG IN") {
-                
-            }.padding()
-            
-            Spacer()
-            
-        }
-    }
-}
-
-struct SignupView : View{
-    var body: some View{
-        VStack {
-            Form{
-                UTextView(iconName: "profile", label: "Username")
-                UTextView(iconName: "ic_mail", label: "Email")
-                UTextView(iconName: "lock", label: "Passowrd",secure: true)
-                
-                
-            }
-            .frame(height:230)
-            PrimaryButton(title: "Sign up") {
-                
-            }.padding()
-            
-            Spacer()
-            
-        }
-    }
-}
-
-extension Text {
-    init(_ astring: NSAttributedString) {
-        self.init("")
-        
-        astring.enumerateAttributes(in: NSRange(location: 0, length: astring.length), options: []) { (attrs, range, _) in
-            
-            var t = Text(astring.attributedSubstring(from: range).string)
-            
-            if let color = attrs[NSAttributedString.Key.foregroundColor] as? UIColor {
-                t  = t.foregroundColor(Color(color))
-            }
-            
-            if let font = attrs[NSAttributedString.Key.font] as? UIFont {
-                t  = t.font(.init(font))
-            }
-            
-            if let kern = attrs[NSAttributedString.Key.kern] as? CGFloat {
-                t  = t.kerning(kern)
-            }
-            
-            
-            if let striked = attrs[NSAttributedString.Key.strikethroughStyle] as? NSNumber, striked != 0 {
-                if let strikeColor = (attrs[NSAttributedString.Key.strikethroughColor] as? UIColor) {
-                    t = t.strikethrough(true, color: Color(strikeColor))
-                } else {
-                    t = t.strikethrough(true)
-                }
-            }
-            
-            if let baseline = attrs[NSAttributedString.Key.baselineOffset] as? NSNumber {
-                t = t.baselineOffset(CGFloat(baseline.floatValue))
-            }
-            
-            if let underline = attrs[NSAttributedString.Key.underlineStyle] as? NSNumber, underline != 0 {
-                if let underlineColor = (attrs[NSAttributedString.Key.underlineColor] as? UIColor) {
-                    t = t.underline(true, color: Color(underlineColor))
-                } else {
-                    t = t.underline(true)
-                }
-            }
-            
-            self = self + t
-            
-        }
-    }
-}
